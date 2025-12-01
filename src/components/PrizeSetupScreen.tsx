@@ -14,18 +14,19 @@ const colors = {
 };
 
 const DEFAULT_SEGMENT_COLORS = [
+  "#FFFFFF",
   "#009A6F",
-  "#FFB800",
-  "#F97316",
-  "#22C55E",
-  "#6366F1",
-  "#EC4899",
   "#0EA5E9",
+  "#6366F1",
+  "#F97316",
+  "#FFB800",
+  "#EC4899",
+  "#22C55E",
 ];
 
 type PrizeSetupScreenProps = {
   prizes: Prize[];
-  onPrizesChange: (p: Prize[]) => void;
+  onPrizesChange: (prizes: Prize[]) => void;
 
   wheelTitle: string;
   onWheelTitleChange: (title: string) => void;
@@ -56,8 +57,11 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
   onGoToWheel,
 }) => {
   const [addDialogVisible, setAddDialogVisible] = React.useState(false);
-
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleAddPrizeClick = () => {
+    setAddDialogVisible(true);
+  };
 
   const handleDeletePrize = (id: string) => {
     const next = prizes.filter((p) => p.id !== id);
@@ -86,13 +90,19 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
 
   const handleClearCenterImage = () => {
     onCenterImageChange(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleAddCustomColor = (hex: string) => {
     if (!hex) return;
     if (customColors.includes(hex)) return;
     onCustomColorsChange([...customColors, hex]);
+  };
+
+  const handleClearCustomColors = () => {
+    onCustomColorsChange([]);
   };
 
   const handleSaveNewPrizeFromDialog = (data: {
@@ -103,204 +113,56 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
   }) => {
     const newPrize: Prize = {
       id: Date.now().toString(),
-      label: data.label || "",
+      label: data.label.trim(), // без fallback „Награда“
       count: data.count,
       imageData: data.imageData,
       segmentColor: data.segmentColor ?? undefined,
     };
-    onPrizesChange([...prizes, newPrize]);
-  };
 
-  const titleValue =
-    wheelTitle && wheelTitle.trim().length > 0
-      ? wheelTitle
-      : "Колело на наградите";
+    onPrizesChange([...prizes, newPrize]);
+    setAddDialogVisible(false);
+  };
 
   return (
     <div
       style={{
         flex: 1,
         width: "100%",
-        maxWidth: 900,
+        maxWidth: 960,
         margin: "0 auto",
         padding: 16,
         background: colors.bg,
-        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
       }}
     >
-      <h1
-        style={{
-          fontSize: 26,
-          fontWeight: 600,
-          color: colors.text,
-          textAlign: "center",
-          marginBottom: 12,
-        }}
-      >
-        Настройки на наградите
-      </h1>
-
-      {/* Колело */}
+      {/* Header */}
       <div
         style={{
-          marginBottom: 16,
-          padding: 14,
-          borderRadius: 16,
-          background: colors.cardBg,
-          border: `1px solid ${colors.border}`,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 4,
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: colors.text }}>
-          Колело
-        </h2>
-
-        <label
+        <h1
           style={{
-            display: "block",
-            marginTop: 8,
-            marginBottom: 4,
-            fontSize: 13,
-            color: colors.textMuted,
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 700,
+            color: colors.text,
           }}
         >
-          Заглавие на колелото
-        </label>
-        <input
-          value={titleValue}
-          onChange={(e) => onWheelTitleChange(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "8px 10px",
-            borderRadius: 8,
-            border: `1px solid ${colors.border}`,
-          }}
-        />
+          Настройки на колелото
+        </h1>
 
-        <label
-          style={{
-            display: "block",
-            marginTop: 8,
-            marginBottom: 4,
-            fontSize: 13,
-            color: colors.textMuted,
-          }}
-        >
-          Централно изображение
-        </label>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {onGoToWheel && (
           <button
             type="button"
-            onClick={handlePickCenterImageClick}
+            onClick={onGoToWheel}
             style={{
-              borderRadius: 999,
-              border: `1px solid ${colors.border}`,
-              padding: "8px 12px",
-              background: "#F9FAFB",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              cursor: "pointer",
-            }}
-          >
-            {centerImageData ? (
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  overflow: "hidden",
-                  border: `1px solid ${colors.border}`,
-                  background: "#FFFFFF",
-                }}
-              >
-                <img
-                  src={centerImageData}
-                  alt="Center"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              </div>
-            ) : (
-              <span style={{ fontSize: 13, color: colors.textMuted }}>
-                Избери изображение
-              </span>
-            )}
-          </button>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleCenterImageFileChange}
-          />
-          {centerImageData && (
-            <button
-              type="button"
-              onClick={handleClearCenterImage}
-              style={{
-                padding: "6px 10px",
-                borderRadius: 999,
-                border: `1px solid ${colors.border}`,
-                background: "#FFFFFF",
-                cursor: "pointer",
-                fontSize: 12,
-                color: colors.textMuted,
-              }}
-            >
-              Премахни
-            </button>
-          )}
-        </div>
-
-        <label
-          style={{
-            display: "block",
-            marginTop: 8,
-            marginBottom: 4,
-            fontSize: 13,
-            color: colors.textMuted,
-          }}
-        >
-          Парола за достъп до настройките
-        </label>
-        <input
-          type="password"
-          value={settingsPassword}
-          onChange={(e) => onSettingsPasswordChange(e.target.value)}
-          placeholder="Оставете празно, ако не искате парола"
-          style={{
-            width: "100%",
-            padding: "8px 10px",
-            borderRadius: 8,
-            border: `1px solid ${colors.border}`,
-          }}
-        />
-      </div>
-
-      {/* Награди */}
-      <div
-        style={{
-          marginBottom: 16,
-          padding: 14,
-          borderRadius: 16,
-          background: colors.cardBg,
-          border: `1px solid ${colors.border}`,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: colors.text }}>
-            Награди
-          </h2>
-          <button
-            type="button"
-            onClick={() => setAddDialogVisible(true)}
-            style={{
-              padding: "8px 16px",
+              padding: "8px 14px",
               borderRadius: 999,
               border: "none",
               background: colors.primary,
@@ -310,109 +172,383 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
               fontSize: 14,
             }}
           >
-            Нова награда
+            Към колелото
+          </button>
+        )}
+      </div>
+
+      {/* Заглавие + парола */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            flex: 1,
+            minWidth: 220,
+            background: colors.cardBg,
+            borderRadius: 12,
+            padding: 12,
+            border: `1px solid ${colors.border}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: colors.text,
+              marginBottom: 4,
+            }}
+          >
+            Заглавие на колелото
+          </div>
+          <input
+            value={wheelTitle}
+            onChange={(e) => onWheelTitleChange(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: 8,
+              border: `1px solid ${colors.border}`,
+              fontSize: 14,
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            width: 260,
+            background: colors.cardBg,
+            borderRadius: 12,
+            padding: 12,
+            border: `1px solid ${colors.border}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: colors.text,
+              marginBottom: 4,
+            }}
+          >
+            Парола за настройки
+          </div>
+          <input
+            type="password"
+            value={settingsPassword}
+            onChange={(e) => onSettingsPasswordChange(e.target.value)}
+            placeholder=""
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: 8,
+              border: `1px solid ${colors.border}`,
+              fontSize: 14,
+            }}
+          />
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 11,
+              color: colors.textMuted,
+            }}
+          >
+            Ако оставиш празно, екранът с настройки ще е свободно достъпен.
+          </div>
+        </div>
+      </div>
+
+      {/* Централна картинка */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            flex: 1,
+            minWidth: 260,
+            background: colors.cardBg,
+            borderRadius: 12,
+            padding: 12,
+            border: `1px solid ${colors.border}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              overflow: "hidden",
+              border: `1px solid ${colors.border}`,
+              background: "#F9FAFB",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 32,
+            }}
+          >
+            {centerImageData ? (
+              <img
+                src={centerImageData}
+                alt="Center"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              ""
+            )}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              flex: 1,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: colors.text,
+              }}
+            >
+              Картинка в центъра
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                color: colors.textMuted,
+              }}
+            >
+              По желание – лого на търговския център или бранда.
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginTop: 4,
+              }}
+            >
+              <button
+                type="button"
+                onClick={handlePickCenterImageClick}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  border: "none",
+                  background: "#E5E7EB",
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+              >
+                Избери файл…
+              </button>
+              {centerImageData && (
+                <button
+                  type="button"
+                  onClick={handleClearCenterImage}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 999,
+                    border: "none",
+                    background: "#F3F4F6",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    color: colors.textMuted,
+                  }}
+                >
+                  Изчисти
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleCenterImageFileChange}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Списък с награди */}
+      <div
+        style={{
+          background: colors.cardBg,
+          borderRadius: 12,
+          padding: 12,
+          border: `1px solid ${colors.border}`,
+          marginTop: 4,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: colors.text,
+            }}
+          >
+            Награди
+          </div>
+          <button
+            type="button"
+            onClick={handleAddPrizeClick}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 999,
+              border: "none",
+              background: colors.primary,
+              color: "#FFFFFF",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            + Добави награда
           </button>
         </div>
 
         {prizes.length === 0 ? (
-          <p
+          <div
             style={{
-              marginTop: 12,
-              fontSize: 14,
+              fontSize: 13,
               color: colors.textMuted,
-              textAlign: "center",
             }}
           >
-            Все още няма добавени награди. Използвайте бутона „Нова награда“.
-          </p>
+            Все още няма добавени награди.
+          </div>
         ) : (
-          <div style={{ marginTop: 8 }}>
-            {prizes.map((item) => (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
+            {prizes.map((p) => (
               <div
-                key={item.id}
+                key={p.id}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "8px 10px",
-                  borderRadius: 14,
-                  marginBottom: 8,
-                  background: colors.cardBg,
+                  gap: 8,
+                  padding: "6px 8px",
+                  borderRadius: 8,
                   border: `1px solid ${colors.border}`,
                 }}
               >
+                {/* цвят */}
                 <div
                   style={{
-                    width: 12,
-                    height: 12,
+                    width: 20,
+                    height: 20,
                     borderRadius: "50%",
-                    marginRight: 8,
-                    background: item.segmentColor || "#E5E7EB",
-                    opacity: item.segmentColor ? 1 : 0.4,
+                    background: p.segmentColor || "#CBD5F5",
+                    border: "1px solid rgba(0,0,0,0.1)",
                   }}
                 />
-                {item.imageData ? (
-                  <img
-                    src={item.imageData}
-                    alt={item.label}
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 10,
-                      marginRight: 10,
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
+
+                {/* картинка */}
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    border: `1px solid ${colors.border}`,
+                    background: "#F9FAFB",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                    flexShrink: 0,
+                  }}
+                >
+                  {p.imageData ? (
+                    <img
+                      src={p.imageData}
+                      alt={p.label || "Награда"}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    "🎁"
+                  )}
+                </div>
+
+                {/* текст */}
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
                   <div
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 10,
-                      marginRight: 10,
-                      background: "#F9FAFB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span style={{ fontSize: 20 }}>🎁</span>
-                  </div>
-                )}
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      color: colors.text,
-                      marginBottom: 2,
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: 600,
-                      color: colors.promo,
+                      color: colors.text,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
-                    Брой: {item.count}
+                    {p.label && p.label.trim().length > 0 ? p.label : ""}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: colors.textMuted,
+                    }}
+                  >
+                    Брой: {p.count}
                   </div>
                 </div>
+
+                {/* бутони */}
                 <button
                   type="button"
-                  onClick={() => handleDeletePrize(item.id)}
+                  onClick={() => handleDeletePrize(p.id)}
                   style={{
                     padding: "4px 8px",
                     borderRadius: 999,
                     border: "none",
-                    background: colors.danger,
-                    color: "#FFFFFF",
-                    fontWeight: 700,
+                    background: "#FEE2E2",
+                    color: colors.danger,
+                    fontSize: 12,
                     cursor: "pointer",
-                    marginLeft: 8,
                   }}
                 >
-                  ✕
+                  Изтрий
                 </button>
               </div>
             ))}
@@ -420,25 +556,7 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
         )}
       </div>
 
-      {onGoToWheel && (
-        <button
-          type="button"
-          onClick={onGoToWheel}
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 999,
-            border: `1px solid ${colors.border}`,
-            background: colors.cardBg,
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: "pointer",
-          }}
-        >
-          Към колелото
-        </button>
-      )}
-
+      {/* Диалог за добавяне на награда */}
       <AddPrizeDialog
         visible={addDialogVisible}
         onClose={() => setAddDialogVisible(false)}
@@ -446,6 +564,7 @@ export const PrizeSetupScreen: React.FC<PrizeSetupScreenProps> = ({
         paletteColors={DEFAULT_SEGMENT_COLORS}
         customColors={customColors}
         onAddCustomColor={handleAddCustomColor}
+        onClearCustomColors={handleClearCustomColors}
       />
     </div>
   );
