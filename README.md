@@ -1,1 +1,1 @@
-https://thefinalcutbg.github.io/prize-wheel/
+DEMO: https://thefinalcutbg.github.io/prize-wheel/
