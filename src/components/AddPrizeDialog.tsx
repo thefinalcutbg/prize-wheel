@@ -40,7 +40,7 @@ export const AddPrizeDialog: React.FC<AddPrizeDialogProps> = ({
   useEffect(() => {
     if (visible) {
       setLabel("");
-      setCountText("1");
+      setCountText("");
       setImageData(null);
       setSelectedColor(paletteColors[0] ?? null);
       setCustomColorText("");
