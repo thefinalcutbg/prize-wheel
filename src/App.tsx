@@ -17,7 +17,7 @@ export function App() {
   const [screen, setScreen] = useState<Screen>("wheel");
 
   const [prizes, setPrizes] = useState<Prize[]>([]);
-  const [wheelTitle, setWheelTitle] = useState("Колело на наградите");
+  const [wheelTitle, setWheelTitle] = useState("");
   const [centerImageData, setCenterImageData] = useState<string | null>(null);
   const [settingsPassword, setSettingsPassword] = useState<string>("");
   const [customColors, setCustomColors] = useState<string[]>([]);
