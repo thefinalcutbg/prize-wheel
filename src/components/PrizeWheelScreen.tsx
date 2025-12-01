@@ -477,8 +477,7 @@ export const PrizeWheelScreen: React.FC<Props> = ({
                 color: colors.textMuted,
               }}
             >
-              Всички награди са с изчерпани бройки. Можеш да добавиш нови от
-              екрана „Настройки“.
+              Всички награди са с изчерпани бройки.
             </div>
             <div
               style={{
