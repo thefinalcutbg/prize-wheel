@@ -256,7 +256,7 @@ export const AddPrizeDialog: React.FC<AddPrizeDialogProps> = ({
               marginBottom: 4,
             }}
           >
-            Картинка (по желание)
+            Картинка
           </label>
 
           <div
